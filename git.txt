@@ -1,0 +1,6 @@
+Look at the help pages for git log and git diff.
+
+Add to the .gitignore you already started to include a specific file name, then add that file to your repository.
+
+Create a file that contains the Git log for this repository. Use grep to see which day of the week most of the commits occurred on.
+$ egrep 'Mon|Tue|Wen|Thu|Fri|Sat|Sun' gitlog.log

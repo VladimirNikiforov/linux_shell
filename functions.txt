@@ -1,0 +1,99 @@
+function [name of function] {
+  # code here
+}
+
+
+#!/usr/bin/env bash
+# File: hello.sh
+
+function hello {
+  echo "Hello"
+}
+
+hello
+hello
+hello
+
+
+#!/usr/bin/env bash
+# File: ntmy.sh
+
+function ntmy {
+  echo "Nice to meet you $1"
+}
+
+
+source ntmy.sh
+ntmy Jeff
+ntmy Philip
+ntmy Jenny
+
+## Nice to meet you Jeff
+## Nice to meet you Philip
+## Nice to meet you Jenny
+
+
+
+#!/usr/bin/env bash
+# File: addseq.sh
+
+function addseq {
+  sum=0
+
+  for element in $@
+  do
+    let sum=sum+$element
+  done
+
+  echo $sum
+}
+
+source addseq.sh
+addseq 12 90 3
+addseq 0 1 1 2 3 5 8 13
+addseq
+addseq 4 6 6 6 4
+
+## 105
+## 33
+## 0
+## 26
+
+
+##########################################################
+
+
+#!/usr/bin/env bash
+# File: addseq2.sh
+
+function addseq2 {
+  local sum=0
+
+  for element in $@
+  do
+    let sum=sum+$element
+  done
+
+  echo $sum
+}
+
+source addseq.sh
+source addseq2.sh
+sum=4444
+addseq 5 10 15 20
+echo $sum
+
+## 50
+## 50
+
+sum=4444
+addseq2 5 10 15 20
+echo $sum
+
+## 50
+## 4444
+
+my_sum=$(addseq2 5 10 15 20)
+echo $my_sum
+
+## 50

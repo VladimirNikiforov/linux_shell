@@ -1,0 +1,28 @@
+plagues=(blood frogs lice flies sickness boils hail locusts darkness death)
+echo ${plagues[0]}
+## blood
+echo ${plagues[3]}
+## flies
+echo ${plagues[*]}
+## blood frogs lice flies sickness boils hail locusts darkness death
+
+echo ${plagues[*]}
+plagues[4]=disease
+echo ${plagues[*]}
+## blood frogs lice flies sickness boils hail locusts darkness death
+## blood frogs lice flies disease boils hail locusts darkness death
+
+echo ${plagues[*]:5:3}
+## boils hail locusts
+
+echo ${#plagues[*]}
+## 10
+
+dwarfs=(grumpy sleepy sneezy doc)
+echo ${dwarfs[*]}
+dwarfs+=(bashful dopey happy)
+echo ${dwarfs[*]}
+## grumpy sleepy sneezy doc
+## grumpy sleepy sneezy doc bashful dopey happy
+
+

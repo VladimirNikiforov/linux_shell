@@ -1,0 +1,97 @@
+Perhaps there are some design patters that you’ve been noticing since we started talking about Unix tools, and now we’re going to discuss them explicitly. Unix tools were designed along a set of guidelines which are best summarized by Ken Thompson’s (https://en.wikipedia.org/wiki/Ken_Thompson) idea that each Unix program should do one thing well. Following this rule when writing functions and programs accomplished several goals:
+
+Limiting a program to only doing one thing reduces the length of the program, and the shorter a program is the easier it is to fix if it contains bugs or if it needs to be revised.
+Writing short programs also helps the users of your code understand what’s going on in your code in the event that they need to read your code. Reading a poem induces a different cognitive load compared to reading a novel.
+Folks who don’t read the source code of your program (most users won’t - they shouldn’t have to) will be able to understand the inputs, outputs, and side effects of your program more easily.
+Using small programs to write a new program will increase the likelihood that the new program will also be small. Composability is the concept of stringing small programs together to create a new program.
+The concept of composability in Unix is best illustrated by the use of the pipe operator (|) for creating pipelines of programs. When you’re considering what inputs your program is going to have and what your program is going to print to the console you should consider whether or not your program might be used in a pipeline, and you should organize your program accordingly.
+
+In the previous section we discussed the difference between functions that compute values and functions that produce side effects. You should notice that the side effect functions like mv and cp do not print any text to the console if they are successful. The concept of quietness is another important part of the Unix philosophy. Quietness in this case means that a function should not print to the console unless it is necessary, either to inform the user of a value (pwd), to display the result of a computation (bc), or to warn the user that an error has occurred.
+
+
+ls -l | head -n 3
+
+## -rw-rw-r-- 1 sean sean 138 Jun 26 12:51 addseq.sh
+## -rw-rw-r-- 1 sean sean 146 Jun 26 14:45 addseq2.sh
+## -rw-rw-r-- 1 sean sean 140 Jan 29 10:06 bigmath.sh
+
+The left column of this table contains a series of individual characters and dashes. The first hyphen (-) signifies that each of the entries in this list are files. If any of them were directories then instead of a hyphen there would be a d. Excluding the first hyphen we have the following string: rw-rw-r--. This string reflects the permissions that are set up for this file. There are three permissions that we can grant: the ability to read the file (r), write to or edit the file (w), or execute the file (x) as a program. These three permissions can be granted on three different levels of access which correspond to each of the three sets of rwx in the permissions string: the owner of the file, the group that the file belongs to, and everyone other than the owner and the members of a group. Since you created the file you are the owner of the file, and you can set the permissions for files that you own using the chmod command.
+
+The chmod command takes two arguments. The first argument is a string which specifies how we’re going to change permissions for a file, and the second argument is the path to the file. The first argument has to be composed in a very specific way. First we can specify which set of users we’re going to change permissions for:
+
+Character	Meaning
+u	The owner of the file
+g	The group that the file belongs to
+o	Everyone else
+a	Everyone above
+We then need to specify whether we’re going to add, remove, or set the permission:
+
+Character	Meaning
++	Add permission
+-	Remove permission
+=	Set permission
+Finally we specify what permission we’re changing:
+
+Character	Meaning
+r	Read a file
+w	Write to or edit a file
+x	Execute a file
+
+echo 'echo "a small program"' > short
+
+ls -l short
+## -rw-r--r--  1 sean  staff  23 Jun 28 09:47 short
+
+chmod u+x short
+ls -l short
+## -rwxr--r--  1 sean  staff  23 Jun 28 09:47 short
+
+./short
+## a small program
+
+echo '#!/usr/bin/env bash' > short
+echo 'echo "a small program"' >> short
+## a small program
+
+
+echo $HOME
+echo $PWD
+## /Users/sean
+## /Users/sean/Code
+
+echo $PATH
+## /usr/local/bin:/usr/bin:/bin:/usr/local/git/bin
+
+
+mkdir Commands
+nano ~/.bash_profile
+
+alias docs='cd ~/Documents'
+alias edbp='nano ~/.bash_profile'
+
+export PATH=~/Code/Commands:$PATH
+
+source ~/.bash_profile
+short
+## a small program
+
+
+Alternatively to making individual scripts executable we can add a source command to our ~/.bash_profile so that we can use a Bash function on the command line. Let’s use nano to open up our ~/.bash_profile again.
+
+nano ~/.bash_profile
+
+alias docs='cd ~/Documents'
+alias edbp='nano ~/.bash_profile'
+
+export PATH=~/Code/Commands:$PATH
+source ~/Code/addseq2.sh
+
+Save the ~/.bash_profile, quit nano, and now let’s source our ~/.bash_profile so we can test if we can use addseq2.
+
+source ~/.bash_profile
+addseq2 9 8 7
+## 24
+
+
+
+

@@ -1,0 +1,429 @@
+ssh root@159.203.134.88
+
+## root@159.203.134.88's password:
+## # (Enter your password)
+
+mkdir textfiles
+echo "From the server" > textfiles/server-file.txt
+logout
+
+## Connection to 159.203.134.88 closed.
+
+
+Now that we’re back at the prompt on our local machine let’s try getting server-file.txt from our server. The arguments for copying files from a server with scp have the following general structure:
+
+scp [username]@[IP address]:path/to/file/on/server path/on/my/computer
+
+
+
+This copies the file located on the server at path/to/file/on/server to a local path at path/on/my/computer. In the same way we can copy an entire folder from a server using the -r flag:
+
+scp -r [username]@[IP address]:path/to/folder/on/server folder/on/my/computer
+
+
+Let’s try doing this now from our local computer. Enter your password when asked to do so:
+
+cd
+pwd
+
+## /Users/sean/
+
+mkdir Cloud
+cd Cloud
+scp root@159.203.134.88:/root/textfiles/server-file.txt downloaded.txt
+
+## root@159.203.134.88's password:
+## server-file.txt                                         100%   16     1.2KB/s   00:00
+
+cat downloaded.txt
+
+## From the server
+
+
+It worked! Now let’s try uploading a file to our server. The arguments for doing this are just the swapped arguments for downloading a file from a server:
+
+scp path/on/my/computer [username]@[IP address]:path/to/file/on/server 
+
+
+Let’s create a file and upload it to our server:
+
+echo "from local computer" > to-upload.txt
+scp to-upload.txt root@159.203.134.88:/root/textfiles/uploaded-file.txt
+
+## root@159.203.134.88's password:
+## to-upload.txt                                           100%   20     1.8KB/s   00:00
+
+
+Now let’s log in to our server and we’ll see if it’s there:
+
+ssh root@159.203.134.88
+cat textfiles/uploaded-file.txt
+
+## from local computer
+
+
+
+
+curl -O http://website.org/textfile.txt
+
+
+Let’s try downloading the Markdown file from my website:
+curl -O http://seankross.com/the-unix-workbench/01-What-is-Unix.md
+
+##   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+##                                  Dload  Upload   Total   Spent    Left  Speed
+## 100  1198  100  1198    0     0  13681      0 --:--:-- --:--:-- --:--:-- 13770
+
+head -n 5 01-What-is-Unix.md
+
+## # What is Unix?
+## 
+## Unix is an operating system and a set of tools. The tool we'll be using the
+## most in this book is a shell, which is a computer program that provides a
+## command line interface. You've probably seen a command line interface in the
+
+
+
+Looks like we got the file! The curl command is also commonly used for communicating with APIs. API stands for application programming interface. APIs are a set of rules which allow us to communicate with computer programs or with servers on the web. GitHub has a large API which allows us to find out information about GitHub’s users and repositories. Let’s use curl to look at what programming languages are used by some of my repositories. Let’s start with the repository for this book:
+
+curl https://api.github.com/repos/seankross/the-unix-workbench/languages
+{
+  "CSS": 2615,
+  "TeX": 22
+}
+
+It looks like most of the repository is dedicated to making the book website look pretty! Take a look at the URL in the curl command above, and let’s dissect it a little bit. The API itself is located at https://api.github.com/. Then each word in the rest of the url acts as a sort of argument. We’re interested in repos in this case, specifically a repo belonging to the username seankross called the-unix-workbench, and we want to know about which languages are used in that repo. Let’s take a look at one more of my repositories just to see how the response can be different:
+
+curl https://api.github.com/repos/seankross/lego/languages
+
+{
+  "R": 4197,
+  "Shell": 442
+}
+
+
+Looks like we’re getting the response we expect. Before we go on I should clarify: curl sends HTTP requests. HTTP is a technology for sending information over a network, and HTTP powers much of how the internet works. There are different categories of HTTP requests, and the categories are often called verbs. When we use curl without any flags we are sending a GETrequest (GET is an HTTP verb). A GET request is a message that says to a server: “Hi, I live at [IP address]. Would you mind sending some information about yourself to that IP?” In the case above we asked for our own IP address, which httpbin.org knew to just send back to us.
+
+Let’s send a general HTTP GET request to http://httpbin.org/get:
+
+curl http://httpbin.org/get
+
+{
+  "args": {},
+  "headers": {
+    "Accept": "*/*",
+    "Connection": "close",
+    "Host": "httpbin.org",
+    "User-Agent": "curl/7.47.0"
+  },
+  "origin": "159.203.134.88",
+  "url": "http://httpbin.org/get"
+}
+
+
+In the general case we can provide arguments to an HTTP API by putting a question mark (?) after the API’s URL. Let’s try this out:
+
+
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+curl http://httpbin.org/get?Baltimore
+{
+  "args": {
+    "Baltimore": ""
+  },
+  "headers": {
+    "Accept": "*/*",
+    "Connection": "close",
+    "Host": "httpbin.org",
+    "User-Agent": "curl/7.47.0"
+  },
+  "origin": "159.203.134.88",
+  "url": "http://httpbin.org/get?Baltimore"
+}
+Looks like "Baltimore" showed up in args! For most HTTP APIs we need to give names to our arguments, unlike most arguments in Bash. We can specify an argument’s name with the template [argument name]=[argument value]. Let’s take a look at a simple example:
+
+
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+curl http://httpbin.org/get?city=Baltimore
+{
+  "args": {
+    "city": "Baltimore"
+  },
+  "headers": {
+    "Accept": "*/*",
+    "Connection": "close",
+    "Host": "httpbin.org",
+    "User-Agent": "curl/7.47.0"
+  },
+  "origin": "159.203.134.88",
+  "url": "http://httpbin.org/get?city=Baltimore"
+}
+Now we can see that in args there’s a correspondence between city and Baltimore. We can add more named arguments by separating them with an ampersand (&):
+
+
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+curl "http://httpbin.org/get?city=Baltimore&state=Maryland"
+{
+  "args": {
+    "city": "Baltimore",
+    "state": "Maryland"
+  },
+  "headers": {
+    "Accept": "*/*",
+    "Connection": "close",
+    "Host": "httpbin.org",
+    "User-Agent": "curl/7.47.0"
+  },
+  "origin": "159.203.134.88",
+  "url": "http://httpbin.org/get?city=Baltimore&state=Maryland"
+}
+Perhaps you could imagine building a server that accepts HTTP requests, and sends back different information depending on what arguments are provided (for example, send back a weather report given a location). Building these kinds of servers is an advanced topic that is outside the scope of this book, but there are lots of resources out there if you’re interested in building your own HTTP API on a web server.
+
+
+
+
+
+
+One of the most compelling features about any web server is that it’s always powered on and always connected to the internet. This means that we can instruct our server to perform tasks automatically, without us needing to enter a command into a shell. One of the most commonly used programs for executing other programs with a regular frequency is called cron. Let’s take a look at how to use cron to schedule a program to be run.
+
+If you’re not already connected to the server use ssh to connect.
+
+
+
+1
+2
+ssh root@159.203.134.88
+The cron program is part of a family of programs called daemons. A daemon is a program that is always running in the background of our computer. First, let’s see if cron is running. We can get a list of all running programs with the ps command while using the -A flag:
+
+
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+ps -A
+##  PID TTY          TIME CMD
+##    1 ?        00:00:13 systemd
+##    2 ?        00:00:00 kthreadd
+##    3 ?        00:00:03 ksoftirqd/0
+##    5 ?        00:00:00 kworker/0:0H
+##    7 ?        00:00:11 rcu_sched
+##    8 ?        00:00:00 rcu_bh
+##    9 ?        00:00:00 migration/0
+## ...
+You probably have a huge list of programs in your terminal now! Instead of sifting through this listing line-by-line, let’s pipe the output of this command to grep and we’ll look for cron:
+
+
+
+1
+2
+3
+ps -A | grep "cron"
+##  1273 ?        00:00:01 cron
+Looks like the cron daemon is running! In order to assign programs to be executed with cron we need to edit a special text file called the cron table. Before we edit the cron table we need to select the default text editor. If you like using nano (the text editor we’ve been using throughout this book) then enter select-editor into the console, type in the number that corresponds to nano (usually 2) and then press enter:
+
+
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+select-editor
+## Select an editor.  To change later, run 'select-editor'.
+##   1. /bin/ed
+##   2. /bin/nano        <---- easiest
+##   3. /usr/bin/vim.basic
+##   4. /usr/bin/vim.tiny
+## 
+## Choose 1-4 [2]:
+Now that we’ve chosen a text editor we can edit the cron table using the command crontab -e (cron table edit) which will automatically open nano with the appropriate file.
+
+
+
+1
+2
+3
+4
+5
+6
+crontab -e
+# Edit this file to introduce tasks to be run by cron.
+#
+# m h  dom mon dow   command
+Let’s go over the layout of the cron table. First you should notice that any text after a pound sign (#) is a comment, so it’s not seen by cron (just like bash comments). The cron table has six columns:
+
+Minute (m)
+Hour (h)
+Day of Month (dom)
+Month (mon)
+Day of Week (dow)
+Command to be run (command)
+Each column is separated by a single space in the table. The first five columns allow you to specify when you want a particular command to be run. Only certain values are valid in each column:
+
+Minute: 00 - 59 (A particular minute in an hour)
+Hour: 00 - 23 (0 is the midnight hour)
+Day of Month: 01 - 31 (1 is the first day of the month)
+Month: 01 - 12 (1 is January)
+Day of Week 0 - 6 (0 is Sunday)
+There are also a few other characters that are valid in the cron table. The most commonly used character is a star (*) which represents all of the possible values in a column. So a star in the Minute column means “run every minute,” and a star in the Hour column means “run during every hour.” Knowing this let’s make our first entry in the cron table. If we want a command to be executed every minute, during every hour, on every day of the month, during every month, on every day of the week, then we can put stars in all of the first five columns, followed by the command that we want to run. In this case the command that cron will run every minute will be date >> ~/date-file.txt, which will append the date and time when the command is executed to a file in our home directory called date-file.txt. This is what your cron table should look like before you save and exit from nano:
+
+
+
+1
+2
+3
+4
+5
+# Edit this file to introduce tasks to be run by cron.
+#
+# m h  dom mon dow   command
+* * * * * date >> ~/date-file.txt
+Save and exit nano just like you would for a regular text file and then wait a little bit! After a minute has gone by use cat to look at ~/date-file.txt:
+
+
+
+1
+2
+3
+4
+cd
+cat date-file.txt
+## Thu Jun  8 18:50:01 UTC 2017
+Look like our entry in the cron table is working! Wait another minute and then look at the file again:
+
+
+
+1
+2
+3
+4
+5
+cat date-file.txt
+## Thu Jun  8 18:50:01 UTC 2017
+## Thu Jun  8 18:51:01 UTC 2017
+Unless we delete the line that we entered in the cron table, the output from date will be appended to date-file.txt every minute.
+
+The single line of bash date >> ~/date-file.txt is a much simpler program than we would probably use in a cron table, though it’s good for illustrating how a cron table works. If you want to do more complex tasks with cron it’s better for cron to execute a bash script that you’ve written in advance. That way you can just specify bash /path/to/script.sh in the last column of the table.
+
+Using stars in all columns is the simplest line of a cron table, so let’s look at some examples of more complex table entries:
+
+
+
+1
+2
+3
+4
+5
+6
+7
+# m h  dom mon dow   command
+00 * * * * bash /path/to/script.sh     # Runs every hour at the start of the 
+  hour
+00 12 * * * bash /path/to/script.sh    # Runs every day at noon
+* 12 * * * bash /path/to/script.sh     # Runs every minute between 12pm and 12
+  :59pm
+00 00 05 * * bash /path/to/script.sh   # Runs the 5th day of every month at 
+  midnight
+00 00 * 07 * bash /path/to/script.sh   # Runs every day in the month of July at 
+  midnight
+00 00 * * 2 bash /path/to/script.sh    # Runs every Tuesday at midnight
+Besides numbers and the star there are a few other characters that you can use in cron table columns including a hyphen (-) for specifying ranges and a comma (,) for specifying lists of items. For example 00-29 in the Minutes column would specify the first thirty minutes of an hour, while 1,5 in the Day of Week column would specify Monday and Friday.
+
+Let’s take a look at another example of a cron table that uses hyphens and ranges so you can get a sense of how each character works.
+
+
+
+1
+2
+3
+4
+5
+6
+7
+8
+# m h  dom mon dow   command
+00-04 * * * * bash /path/to/script.sh       # Runs every minute for the first 
+  five minutes of every hour
+00 00 * * 0,6 bash /path/to/script.sh       # Runs at midnight every Saturday 
+  and Sunday
+00 03 01-15 * * bash /path/to/script.sh     # Runs at 3am for the first fifteen 
+  days of every month 
+00,30 * * * * bash /path/to/script.sh       # Runs at the start and middle of 
+  every hour
+00 00,12 * * * bash /path/to/script.sh      # Runs every day at midnight and 
+  noon
+00 * 01-07 01,06 * bash /path/to/script.sh  # Runs at the start of every hour 
+  for the first seven days of the months of January and June
+A program that is being run by cron is only as powerful as your imagination can stretch! If you’re familiar with the social network Twitter then you might have come across some Twitter accounts which create posts automatically like Emoji Aquarium, Old Fruit Pictures, or Endless Screaming. Many of these “bot” accounts are powered by cron, which uses Twitter’s HTTP API to post tweets regularly.
+
+Summary
+
+scp copies files between a cloud computer and your personal computer. Use the -r flag in order to copy directories.
+curl allows you to send HTTP requests to other servers. Use the -Oflag to download files with curl.
+ps -A lists all of the programs running in the background of your computer.
+cron allows you to schedule when programs are run. Use crontab -e in order to edit the cron table.
+
+
+
